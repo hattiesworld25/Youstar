@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YouStar</title>
+  <style>
+:root {
+      --bg: #0f0f0f;
+      --panel: #181818;
+      --card: #212121;
+      --text: #f1f1f1;
+      --muted: #aaa;
+      --accent: #ff2d55;
+      --line: #303030;
+}
+    * {box-sizing: border-box;}
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+}
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+}
+.logo {
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+      cursor: pointer;
+      white-space: nowrap;
+}
+.logo span {color: var(--accent);}
+    input[type="search"] {
+      flex: 1;
+      max-width: 640px;
+      background: #121212;
+      border: 1px solid #3a3a3a;
+      color: white;
+      border-radius: 24px;
+      padding: 10px 16px;
+      font-size: 15px;
+}
+.layout {display: flex; min-height: calc(100vh - 61px);}
+    aside {
+      width: 220px;
+      padding: 12px;
+      border-right: 1px solid var(--line);
+}
+    aside button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 15px;
+}
+    aside button.active, aside button:hover {background: #272727;}
+    main {flex: 1; padding: 20px;}
+.grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+}
+.card {cursor: pointer;}
+.thumb {
+      position: relative;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+}
+.thumb img,.thumb video {width: 100%; height: 100%; object-fit: cover; display: block;}
+.dur {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      background: rgba(0,0,0,.8);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+}
+.meta {display: flex; gap: 10px; margin-top: 10px;}
+.avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center; font-weight: 700; flex-shrink: 0;
+}
+    h3 {margin: 0 0 6px; font-size: 15px; line-height: 1.3;}
+.sub {color: var(--muted); font-size: 13px;}
+.watch {max-width: 1100px;}
+    video.player {width: 100%; border-radius: 12px; background: #000; max-height: 62vh;}
+.row {display: flex; justify-content: space-between; align-items: center; gap: 12px;}
+.btn {
+      background: var(--card);
+      color: white;
+      border: 0;
+      border-radius: 18px;
+      padding: 8px 14px;
+      cursor: pointer;
+}
+.btn.subbed {background: var(--accent);}
+.comments {margin-top: 24px;}
+.comment {
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+}
+    textarea {
+      width: 100%;
+      background: #121212;
+      color: white;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 70px;
+}
+    @media (max-width: 800px) {
+      aside {display: none;}
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo" id="homeBtn">You<span>Star</span></div>
+    <input id="q" type="search" placeholder="Search YouStar" />
+  </header>
+  <div class="layout">
+    <aside>
+      <button class="active" data-cat="All">Home</button>
+      <button data-cat="Music">Music</button>
+      <button data-cat="Tech">Tech</button>
+      <button data-cat="Travel">Travel</button>
+      <button data-cat="Food">Food</button>
+    </aside>
+    <main id="app"></main>
+  </div>
+  <script>
+    const videos = [
+      {
+        id: "bbb",
+        title: "Big Buck Bunny — open movie night",
+        channel: "Blender Stars",
+        views: "12M views",
+        age: "3 years ago",
+        cat: "Travel",
+        color: "#e85d4c",
+        dur: "9:56",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        desc: "A short open movie about a giant bunny and a very bad day in the meadow."
+},
+      {
+        id: "ele",
+        title: "Elephants Dream — studio walkthrough",
+        channel: "Orange Studio",
+        views: "4.1M views",
+        age: "5 years ago",
+        cat: "Tech",
+        color: "#f4a261",
+        dur: "10:53",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        desc: "A surreal machine-room story from the Orange open movie project."
+},
+      {
+        id: "sintel",
+        title: "Sintel trailer cut",
+        channel: "Durian Films",
+        views: "8.8M views",
+        age: "2 years ago",
+        cat: "Music",
+        color: "#7b68ee",
+        dur: "14:48",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+        desc: "A dragon, a search, and a score that sticks with you."
+},
+      {
+        id: "tears",
+        title: "Tears of Steel — city VFX reel",
+        channel: "Mango Lab",
+        views: "2.4M views",
+        age: "1 year ago",
+        cat: "Tech",
+        color: "#2a9d8f",
+        dur: "12:14",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+        desc: "Robots, live action, and a future Amsterdam skyline."
+},
+      {
+        id: "subaru",
+        title: "Night drive loops",
+        channel: "Road Kitchen",
+        views: "901K views",
+        age: "6 months ago",
+        cat: "Food",
+        color: "#e9c46a",
+        dur: "0:15",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+        desc: "A short joyride clip used as a demo upload on YouStar."
+},
+      {
+        id: "escape",
+        title: "Escape the city in 15 seconds",
+        channel: "Weekender",
+        views: "3.2M views",
+        age: "8 months ago",
+        cat: "Travel",
+        color: "#457b9d",
+        dur: "0:15",
+        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        desc: "A tiny travel teaser for the YouStar demo feed."
+}
+];
+
+    const comments = {
+      default: [
+        {user: "Nova", text: "The color grade on this is unreal."},
+        {user: "Kai", text: "Watched this twice already. YouStar recs are dialed in."}
+]
+};
+
+    let cat = "All";
+    let query = "";
+    let current = null;
+    const subs = new Set();
+    const likes = new Set();
+
+    const app = document.getElementById("app");
+
+    function filtered() {
+      return videos.filter(v =>
+        (cat === "All" || v.cat === cat) &&
+        (v.title + v.channel).toLowerCase().includes(query.toLowerCase())
+);
+}
+
+    function card(v) {
+      return `
+        <article class="card" data-id="${v.id}">
+          <div class="thumb">
+            <video muted preload="metadata" src="${v.src}#t=1"></video>
+            <span class="dur">${v.dur}</span>
+          </div>
+          <div class="meta">
+            <div class="avatar" style="background:${v.color}">${v.channel[0]}</div>
+            <div>
+              <h3>${v.title}</h3>
+              <div class="sub">${v.channel}<br>${v.views} · ${v.age}</div>
+            </div>
+          </div>
+        </article>`;
+}
+
+    function renderHome() {
+      current = null;
+      const list = filtered();
+      app.innerHTML = list.length
+? `<div class="grid">${list.map(card).join("")}</div>`
+: `<p class="sub">No videos match that search.</p>`;
+      app.querySelectorAll(".card").forEach(el => {
+        el.onclick = () => renderWatch(el.dataset.id);
+});
+}
+
+    function renderWatch(id) {
+      const v = videos.find(x => x.id === id);
+      current = v;
+      const liked = likes.has(v.id);
+      const subbed = subs.has(v.channel);
+      const thread = comments[v.id] || comments.default;
+      app.innerHTML = `
+        <section class="watch">
+          <video class="player" controls autoplay src="${v.src}"></video>
+          <h2>${v.title}</h2>
+          <div class="row">
+            <div class="meta">
+              <div class="avatar" style="background:${v.color}">${v.channel[0]}</div>
+              <div>
+                <strong>${v.channel}</strong>
+                <div class="sub">${v.views}</div>
+              </div>
+            </div>
+            <div>
+              <button class="btn" id="like">${liked? "Liked": "Like"}</button>
+              <button class="btn ${subbed? "subbed": ""}" id="sub">${subbed? "Subscribed": "Subscribe"}</button>
+            </div>
+          </div>
+          <p>${v.desc}</p>
+          <div class="comments">
+            <h3>Comments</h3>
+            <textarea id="draft" placeholder="Add a comment"></textarea>
+            <p><button class="btn" id="post">Comment</button></p>
+            <div id="thread">
+              ${thread.map(c => `<div class="comment"><strong>${c.user}</strong><div>${c.text}</div></div>`).join("")}
+            </div>
+          </div>
+        </section>`;
+      document.getElementById("like").onclick = () => {
+        likes.has(v.id)? likes.delete(v.id): likes.add(v.id);
+        renderWatch(v.id);
+};
+      document.getElementById("sub").onclick = () => {
+        subs.has(v.channel)? subs.delete(v.channel): subs.add(v.channel);
+        renderWatch(v.id);
+};
+      document.getElementById("post").onclick = () => {
+        const text = document.getElementById("draft").value.trim();
+        if (!text) return;
+        comments[v.id] = [{user: "You", text},...(comments[v.id] || comments.default)];
+        renderWatch(v.id);
+};
+}
+
+    document.getElementById("q").oninput = e => {
+      query = e.target.value;
+      renderHome();
+};
+    document.getElementById("homeBtn").onclick = () => {
+      cat = "All";
+      document.querySelectorAll("aside button").forEach(b => b.classList.toggle("active", b.dataset.cat === "All"));
+      renderHome();
+};
+    document.querySelectorAll("aside button").forEach(btn => {
+      btn.onclick = () => {
+        cat = btn.dataset.cat;
+        document.querySelectorAll("aside button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderHome();
+};
+});
+
+    renderHome();
+  </script>
+</body>
+</html>
